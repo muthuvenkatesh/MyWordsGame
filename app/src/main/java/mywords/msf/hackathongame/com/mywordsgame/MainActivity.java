@@ -7,6 +7,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Color;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -32,7 +34,7 @@ public class MainActivity extends Activity {
     private Button btn, loadlevel1 ;
     private List<String> questionList = new ArrayList<>();
     private TextView loadingtxt;
-    private LinearLayout level1Layout;
+    private LinearLayout level1Layout, progressBarLayout;
     private String TAG = "MyWordsGame";
 
     @Override
@@ -42,7 +44,8 @@ public class MainActivity extends Activity {
         btn = (Button)findViewById(R.id.btn);
         loadlevel1 =  (Button)findViewById(R.id.loadlevel1);
         level1Layout = (LinearLayout)findViewById(R.id.level1Layout);
-        loadingtxt = (TextView)findViewById(R.id.loadingtxt);
+        //loadingtxt = (TextView)findViewById(R.id.loadingtxt);
+        progressBarLayout = (LinearLayout)findViewById(R.id.progressBarLayout);
 
         dbHelper = new DBHelper(this);
         Log.i(TAG, String.valueOf(doesDatabaseExist(this, "MyDBName.db")));
@@ -54,45 +57,38 @@ public class MainActivity extends Activity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*List<String> chk = new ArrayList<String>();
-                chk = dbHelper.getAllComments();
-                Log.i("chk Count=====", String.valueOf(chk));*/
-                //if (questionList.size() == 0){
-                    Cursor cd = dbHelper.getAllComments();
-                    for (cd.moveToFirst(); !(cd.isAfterLast()); cd.moveToNext()) {
-                        String userCount = cd.getString(cd.getColumnIndex("name"));
-                        questionList.add(userCount);
-                    }
-                //}
-                if (questionList.size() > 0){
-                    loadlevel1.setVisibility(View.VISIBLE);
-                    loadingtxt.setVisibility(View.GONE);
-                } /*else {
-                    loadlevel1.setVisibility(View.GONE);
-                    loadingtxt.setVisibility(View.VISIBLE);
-                }*/
-                //loadlevel1.setVisibility(View.VISIBLE);
-                Log.i(TAG, String.valueOf(questionList.size()));
+                if (!btn.getText().toString().equalsIgnoreCase("End Game")){
+                    //progressBarLayout.setVisibility(View.VISIBLE);
+                    loadLevel1Data();
+                    Log.i(TAG, "If loop......" + String.valueOf(questionList.size()));
+                } else {
+                    Log.i(TAG, String.valueOf(questionList.size()));
+                    finish();
+                }
+
             }
         });
 
         loadlevel1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                Random rand = new Random();
-                level1Layout.removeAllViews();
-                final int N = 10;
-                final TextView[] myTextViews = new TextView[N];
-                for (int i =1; i<=5; i++){
-                    String randomInt = questionList.get(rand.nextInt(questionList.size()));
-                    Log.i(TAG, "Data========== "+ i +"====="+ randomInt);
-                    final TextView rowTextView = new TextView(MainActivity.this);
-                    rowTextView.setText( i + ")" + randomInt);
-                    rowTextView.setTextColor(Color.BLACK);
-                    rowTextView.setTextSize(20);
-                    level1Layout.addView(rowTextView);
-                    myTextViews[i] = rowTextView;
+                if (questionList != null & questionList.size() > 0) {
+                    Random rand = new Random();
+                    level1Layout.removeAllViews();
+                    final int N = 10;
+                    final TextView[] myTextViews = new TextView[N];
+                    for (int i = 1; i <= 5; i++) {
+                        String randomInt = questionList.get(rand.nextInt(questionList.size()));
+                        Log.i(TAG, "Data========== " + i + "=====" + randomInt);
+                        final TextView rowTextView = new TextView(MainActivity.this);
+                        rowTextView.setText(i + ")" + randomInt);
+                        rowTextView.setTextColor(Color.BLACK);
+                        rowTextView.setTextSize(20);
+                        level1Layout.addView(rowTextView);
+                        myTextViews[i] = rowTextView;
+                    }
+                } else {
+                    loadLevel1Data();
                 }
             }
         });
@@ -102,6 +98,48 @@ public class MainActivity extends Activity {
         File dbFile = context.getDatabasePath(dbName);
         return dbFile.exists();
     }
+
+    private void loadLevel1Data(){
+        progressBarLayout.setVisibility(View.VISIBLE);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (questionList.size() == 0){
+                    //loadlevel1.setVisibility(View.GONE);
+                    //loadingtxt.setVisibility(View.VISIBLE);
+                    Cursor cd = dbHelper.getAllComments();
+                    for (cd.moveToFirst(); !(cd.isAfterLast()); cd.moveToNext()) {
+                        String userCount = cd.getString(cd.getColumnIndex("name"));
+                        questionList.add(userCount);
+                    }
+                    handler.sendMessage(handler.obtainMessage());
+                    cd.close();
+                   /* progressBarLayout.setVisibility(View.GONE);
+                    loadlevel1.setVisibility(View.VISIBLE);
+                    btn.setText("End Game");
+                    btn.setTextColor(Color.RED);*/
+                } /*else {
+                    btn.setText("End Game");
+                    btn.setTextColor(Color.RED);
+                    progressBarLayout.setVisibility(View.GONE);
+                    loadlevel1.setVisibility(View.VISIBLE);
+                    //loadingtxt.setVisibility(View.GONE);
+                }*/
+                //handler.sendMessage(handler.obtainMessage());
+            }
+        }).start();
+    }
+
+    Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            //super.handleMessage(msg);
+            btn.setText("End Game");
+            btn.setTextColor(Color.RED);
+            progressBarLayout.setVisibility(View.GONE);
+            loadlevel1.setVisibility(View.VISIBLE);
+        }
+    };
 
     /*private boolean checkDataBase(){
 
