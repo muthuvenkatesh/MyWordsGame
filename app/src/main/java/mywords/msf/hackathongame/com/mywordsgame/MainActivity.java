@@ -2,6 +2,7 @@ package mywords.msf.hackathongame.com.mywordsgame;
 
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.ContextWrapper;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -24,6 +26,7 @@ public class MainActivity extends Activity {
     private DBHelper dbHelper;
     private Button btn ;
     List<String> questionList = new ArrayList<>();
+    private String TAG = "MyWordsGame";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,26 +34,35 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         btn = (Button)findViewById(R.id.btn);
         dbHelper = new DBHelper(this);
-        if (checkDataBase() != true) {
+        Log.i(TAG, String.valueOf(doesDatabaseExist(this, "MyDBName.db")));
+        String chkDb =  String.valueOf(doesDatabaseExist(this, "MyDBName.db"));
+        if (!chkDb.equalsIgnoreCase("true")) {
             copyTextFileToDB();
         }
+        //copyTextFileToDB();
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 /*List<String> chk = new ArrayList<String>();
                 chk = dbHelper.getAllComments();
                 Log.i("chk Count=====", String.valueOf(chk));*/
+                questionList = new ArrayList<String>();
                 Cursor cd = dbHelper.getAllComments();
                 for (cd.moveToFirst(); !(cd.isAfterLast()); cd.moveToNext()) {
                     String userCount = cd.getString(cd.getColumnIndex("name"));
                     questionList.add(userCount);
                 }
-                Log.i("chk Count=====", String.valueOf(questionList.size()));
+                Log.i(TAG, String.valueOf(questionList.size()));
             }
         });
     }
 
-    private boolean checkDataBase(){
+    private static boolean doesDatabaseExist(ContextWrapper context, String dbName) {
+        File dbFile = context.getDatabasePath(dbName);
+        return dbFile.exists();
+    }
+
+    /*private boolean checkDataBase(){
 
         SQLiteDatabase checkDB = null;
 
@@ -65,7 +77,7 @@ public class MainActivity extends Activity {
         }
 
         return checkDB != null ? true : false;
-    }
+    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -83,6 +95,7 @@ public class MainActivity extends Activity {
     }
 
     public void copyTextFileToDB() {
+        Log.i(TAG, "Copying Files............");
         InputStream inputStream = getResources().openRawResource(R.raw.englishwords);
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
         SQLiteDatabase db = dbHelper.getWritableDatabase();

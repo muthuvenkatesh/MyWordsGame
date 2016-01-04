@@ -123,7 +123,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return contacts;*/
         Cursor c = db.query(CONTACTS_TABLE_NAME, // Table name
                 columns, // String[] containing your column names
-                "charcount is 6 AND ORDER BY RAND()", // your where statement, you do not include the WHERE or the FROM DATABASE_TABLE parts of the query,
+                "charcount is 6", // your where statement, you do not include the WHERE or the FROM DATABASE_TABLE parts of the query,
                 null,
                 null,
                 null,
