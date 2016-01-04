@@ -16,9 +16,36 @@
 -->
     <Button
         android:id="@+id/btn"
-        android:text="check"
+        android:text="Click to start Game..."
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:padding="10dp"/>
+
+    <TextView
+        android:id="@+id/loadingtxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btn"
+        android:layout_centerHorizontal="true"
+        android:text="Loading... wait for 5 sec... "/>
+
+    <Button
+        android:id="@+id/loadlevel1"
+        android:text="Level 1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btn"
+        android:visibility="gone"
+        android:padding="10dp"/>
+
+    <LinearLayout
+        android:id="@+id/level1Layout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/loadlevel1"
+        android:padding="20dp"
+        android:orientation="vertical">
+
+    </LinearLayout>
 
 </RelativeLayout>
