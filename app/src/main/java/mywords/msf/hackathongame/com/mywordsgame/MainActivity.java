@@ -68,7 +68,7 @@ public class MainActivity extends Activity {
 
             }
         });
-
+/*
         loadlevel1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -91,7 +91,50 @@ public class MainActivity extends Activity {
                     loadLevel1Data();
                 }
             }
+        });*/
+
+        loadlevel1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (questionList != null & questionList.size() > 0) {
+                    Random rand = new Random();
+                    level1Layout.removeAllViews();
+                    final int N = 10;
+                    final TextView[] myTextViews = new TextView[N];
+
+                    for (int i = 1; i <= 5; i++) {
+                        String randomInt = questionList.get(rand.nextInt(questionList.size()));
+                        Log.i(TAG, "Data========== " + i + "=====" + randomInt);
+                        final TextView rowTextView = new TextView(MainActivity.this);
+
+                        String str = changeString(randomInt);
+                        rowTextView.setText(i + ")" + str);
+                        rowTextView.setTextColor(Color.BLACK);
+                        rowTextView.setTextSize(20);
+
+                        level1Layout.addView(rowTextView);
+                        myTextViews[i] = rowTextView;
+                    }
+                } else {
+                    loadLevel1Data();
+                }
+            }
         });
+    }
+
+    String changeString(String s) {
+
+        char[] characters = s.toCharArray();
+        System.out.println("NNN String characters= " + characters);
+
+        int rand = (int)(Math.random() * s.length());
+        System.out.println("NNN String rand = " + rand);
+
+        characters[rand] = '_';
+        System.out.println("NNN String characters[rand] = " + characters[rand]);
+
+        return new String(characters);
+
     }
 
     private static boolean doesDatabaseExist(ContextWrapper context, String dbName) {
