@@ -12,11 +12,15 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -28,6 +32,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import static android.view.ViewGroup.LayoutParams.FILL_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.widget.LinearLayout.VERTICAL;
+
 public class MainActivity extends Activity {
 
     private DBHelper dbHelper;
@@ -36,6 +44,8 @@ public class MainActivity extends Activity {
     private TextView loadingtxt;
     private LinearLayout level1Layout, progressBarLayout;
     private String TAG = "MyWordsGame";
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,21 +109,26 @@ public class MainActivity extends Activity {
                 if (questionList != null & questionList.size() > 0) {
                     Random rand = new Random();
                     level1Layout.removeAllViews();
-                    final int N = 10;
-                    final TextView[] myTextViews = new TextView[N];
 
-                    for (int i = 1; i <= 5; i++) {
-                        String randomInt = questionList.get(rand.nextInt(questionList.size()));
-                        Log.i(TAG, "Data========== " + i + "=====" + randomInt);
-                        final TextView rowTextView = new TextView(MainActivity.this);
+                    String randomInt = questionList.get(rand.nextInt(questionList.size()));
+                    String str = changeString(randomInt);
+                    for (int i=0; i< str.length();i++) {
+                        LinearLayout linearLayout = new LinearLayout(MainActivity.this);
+                        linearLayout.setGravity(Gravity.CENTER);
+                        EditText myTextViews = new EditText(MainActivity.this);
+                        myTextViews.setPadding(30, 10, 30, 10);
+                        myTextViews.setBackgroundDrawable(getResources().getDrawable(R.drawable.border_file));
+                        Log.i(TAG, "Data========== " + str.charAt(i));
+                        if (String.valueOf(str.charAt(i)).equalsIgnoreCase("_")){
+                            myTextViews.setText(" ");
+                            myTextViews.setEnabled(true);
+                        } else {
+                            myTextViews.setText(String.valueOf(str.charAt(i)));
+                            myTextViews.setEnabled(false);
+                        }
 
-                        String str = changeString(randomInt);
-                        rowTextView.setText(i + ")" + str);
-                        rowTextView.setTextColor(Color.BLACK);
-                        rowTextView.setTextSize(20);
-
-                        level1Layout.addView(rowTextView);
-                        myTextViews[i] = rowTextView;
+                        linearLayout.addView(myTextViews);
+                        level1Layout.addView(linearLayout);
                     }
                 } else {
                     loadLevel1Data();
@@ -157,18 +172,8 @@ public class MainActivity extends Activity {
                     }
                     handler.sendMessage(handler.obtainMessage());
                     cd.close();
-                   /* progressBarLayout.setVisibility(View.GONE);
-                    loadlevel1.setVisibility(View.VISIBLE);
-                    btn.setText("End Game");
-                    btn.setTextColor(Color.RED);*/
-                } /*else {
-                    btn.setText("End Game");
-                    btn.setTextColor(Color.RED);
-                    progressBarLayout.setVisibility(View.GONE);
-                    loadlevel1.setVisibility(View.VISIBLE);
-                    //loadingtxt.setVisibility(View.GONE);
-                }*/
-                //handler.sendMessage(handler.obtainMessage());
+
+                }
             }
         }).start();
     }
