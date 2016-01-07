@@ -11,6 +11,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -19,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -36,15 +40,17 @@ import static android.view.ViewGroup.LayoutParams.FILL_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.widget.LinearLayout.VERTICAL;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements TextWatcher{
 
     private DBHelper dbHelper;
-    private Button btn, loadlevel1 ;
+    private Button btn, loadlevel1, validate ;
     private List<String> questionList = new ArrayList<>();
     private TextView loadingtxt;
     private LinearLayout level1Layout, progressBarLayout;
     private String TAG = "MyWordsGame";
-
+    private String answerStr = " ", inputStr = " ",  randomInt = " ";
+    private ImageView imageResult;
+    private TextView textResult;
 
 
     @Override
@@ -54,7 +60,9 @@ public class MainActivity extends Activity {
         btn = (Button)findViewById(R.id.btn);
         loadlevel1 =  (Button)findViewById(R.id.loadlevel1);
         level1Layout = (LinearLayout)findViewById(R.id.level1Layout);
-        //loadingtxt = (TextView)findViewById(R.id.loadingtxt);
+        validate = (Button)findViewById(R.id.submit);
+        imageResult = (ImageView)findViewById(R.id.imageResult);
+        textResult = (TextView)findViewById(R.id.textResult);
         progressBarLayout = (LinearLayout)findViewById(R.id.progressBarLayout);
 
         dbHelper = new DBHelper(this);
@@ -67,7 +75,7 @@ public class MainActivity extends Activity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!btn.getText().toString().equalsIgnoreCase("End Game")){
+                if (!btn.getText().toString().equalsIgnoreCase("End Game")) {
                     //progressBarLayout.setVisibility(View.VISIBLE);
                     loadLevel1Data();
                     Log.i(TAG, "If loop......" + String.valueOf(questionList.size()));
@@ -76,6 +84,30 @@ public class MainActivity extends Activity {
                     finish();
                 }
 
+            }
+        });
+
+        validate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println("Answer value ====="+  answerStr.toString());
+                System.out.println("input  value ====="+ inputStr.toString());
+                System.out.println("random  value ====="+ randomInt.toString());
+
+                String str = inputStr.replace("_", answerStr.trim());
+                if (str.equalsIgnoreCase(randomInt)){
+                    System.out.println("Success =====" + str);
+                    textResult.setVisibility(View.VISIBLE);
+                    imageResult.setVisibility(View.VISIBLE);
+                    imageResult.setImageResource(R.drawable.yes);
+                    textResult.setText("Perfect !!!");
+                } else {
+                    System.out.println("Failed =====" + str);
+                    textResult.setVisibility(View.VISIBLE);
+                    imageResult.setVisibility(View.VISIBLE);
+                    imageResult.setImageResource(R.drawable.no);
+                    textResult.setText("Try Again !!!");
+                }
             }
         });
 /*
@@ -102,7 +134,7 @@ public class MainActivity extends Activity {
                 }
             }
         });*/
-
+        //final EditText myTextViews = new EditText(MainActivity.this);
         loadlevel1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -110,20 +142,46 @@ public class MainActivity extends Activity {
                     Random rand = new Random();
                     level1Layout.removeAllViews();
 
-                    String randomInt = questionList.get(rand.nextInt(questionList.size()));
-                    String str = changeString(randomInt);
-                    for (int i=0; i< str.length();i++) {
+                    textResult.setVisibility(View.GONE);
+                    imageResult.setVisibility(View.GONE);
+
+                    randomInt = questionList.get(rand.nextInt(questionList.size()));
+                    inputStr = changeString(randomInt);
+                    for (int i = 0; i < inputStr.length(); i++) {
                         LinearLayout linearLayout = new LinearLayout(MainActivity.this);
                         linearLayout.setGravity(Gravity.CENTER);
                         EditText myTextViews = new EditText(MainActivity.this);
+                       /* int maxLength = 1;
+                        InputFilter[] FilterArray = new InputFilter[1];
+                        FilterArray[0] = new InputFilter.LengthFilter(maxLength);
+                        myTextViews.setFilters(FilterArray);*/
+                        //myTextViews.addTextChangedListener(MainActivity.this);
                         myTextViews.setPadding(30, 10, 30, 10);
                         myTextViews.setBackgroundDrawable(getResources().getDrawable(R.drawable.border_file));
-                        Log.i(TAG, "Data========== " + str.charAt(i));
-                        if (String.valueOf(str.charAt(i)).equalsIgnoreCase("_")){
+                        Log.i(TAG, "Data========== " + inputStr.charAt(i));
+                        if (String.valueOf(inputStr.charAt(i)).equalsIgnoreCase("_")) {
                             myTextViews.setText(" ");
                             myTextViews.setEnabled(true);
+                            myTextViews.addTextChangedListener(MainActivity.this);
+                           /* myTextViews.addTextChangedListener(new TextWatcher() {
+                                @Override
+                                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                                }
+
+                                @Override
+                                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                    answerStr = myTextViews.getText().toString();
+                                }
+
+                                @Override
+                                public void afterTextChanged(Editable s) {
+
+                                }
+                            });*/
+
                         } else {
-                            myTextViews.setText(String.valueOf(str.charAt(i)));
+                            myTextViews.setText(String.valueOf(inputStr.charAt(i)));
                             myTextViews.setEnabled(false);
                         }
 
@@ -151,6 +209,19 @@ public class MainActivity extends Activity {
         return new String(characters);
 
     }
+/*
+    private Button submitButton() {
+        Button button = new Button(this);
+        button.setHeight(WRAP_CONTENT);
+        button.setText("Submit");
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        return button;
+    }*/
 
     private static boolean doesDatabaseExist(ContextWrapper context, String dbName) {
         File dbFile = context.getDatabasePath(dbName);
@@ -250,5 +321,22 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             System.err.println("Parse Error: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+        imageResult.setVisibility(View.GONE);
+        textResult.setVisibility(View.GONE);
+        answerStr = s.toString();
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+
     }
 }
