@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Color;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -50,8 +51,11 @@ public class MainActivity extends Activity implements TextWatcher{
     private String TAG = "MyWordsGame";
     private String answerStr = " ", inputStr = " ",  randomInt = " ";
     private ImageView imageResult;
-    private TextView textResult;
-
+    private TextView textResult, text;
+    private MyCountDownTimer countDownTimer;
+    private final long startTime = 30 * 1000;
+    private final long interval = 1 * 1000;
+    private boolean timerHasStarted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +68,9 @@ public class MainActivity extends Activity implements TextWatcher{
         imageResult = (ImageView)findViewById(R.id.imageResult);
         textResult = (TextView)findViewById(R.id.textResult);
         progressBarLayout = (LinearLayout)findViewById(R.id.progressBarLayout);
+        text = (TextView) this.findViewById(R.id.timer);
+        countDownTimer = new MyCountDownTimer(startTime, interval);
+        text.setText(text.getText() + String.valueOf(startTime / 1000));
 
         dbHelper = new DBHelper(this);
         Log.i(TAG, String.valueOf(doesDatabaseExist(this, "MyDBName.db")));
@@ -144,6 +151,15 @@ public class MainActivity extends Activity implements TextWatcher{
 
                     textResult.setVisibility(View.GONE);
                     imageResult.setVisibility(View.GONE);
+                    if (!timerHasStarted) {
+                        countDownTimer.start();
+                        timerHasStarted = true;
+                        //startB.setText("STOP");
+                    } /*else {
+                        countDownTimer.cancel();
+                        timerHasStarted = false;
+                        //startB.setText("RESTART");
+                    }*/
 
                     randomInt = questionList.get(rand.nextInt(questionList.size()));
                     inputStr = changeString(randomInt);
@@ -330,13 +346,39 @@ public class MainActivity extends Activity implements TextWatcher{
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            if (s.toString().trim().length() > 0) {
+                answerStr = s.toString();
+                validate.setEnabled(true);
+            } else {
+                validate.setEnabled(false);
+            }
+
         imageResult.setVisibility(View.GONE);
         textResult.setVisibility(View.GONE);
-        answerStr = s.toString();
     }
 
     @Override
     public void afterTextChanged(Editable s) {
 
+    }
+
+    public class MyCountDownTimer extends CountDownTimer {
+        public MyCountDownTimer(long startTime, long interval) {
+            super(startTime, interval);
+        }
+
+        @Override
+        public void onFinish() {
+            text.setText("Time's up!");
+            validate.setEnabled(false);
+            imageResult.setVisibility(View.GONE);
+            textResult.setVisibility(View.GONE);
+        }
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+            text.setText("" + millisUntilFinished / 1000);
+        }
     }
 }
