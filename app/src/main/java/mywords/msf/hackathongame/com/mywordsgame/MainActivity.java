@@ -55,9 +55,9 @@ public class MainActivity extends Activity implements TextWatcher{
     private String TAG = "MyWordsGame";
     private String answerStr = " ", inputStr = " ",  randomInt = " ";
     private ImageView imageResult;
-    private TextView textResult, text;
+    private TextView textResult, text, levelText;
     private MyCountDownTimer countDownTimer;
-    private final long startTime = 30 * 1000;
+    private long startTime = 30 * 1000;
     private final long interval = 1 * 1000;
     private boolean timerHasStarted = false;
     private RatingBar ratingBar;
@@ -72,6 +72,7 @@ public class MainActivity extends Activity implements TextWatcher{
         validate = (Button)findViewById(R.id.submit);
         imageResult = (ImageView)findViewById(R.id.imageResult);
         textResult = (TextView)findViewById(R.id.textResult);
+        levelText = (TextView)findViewById(R.id.textView);
         progressBarLayout = (LinearLayout)findViewById(R.id.progressBarLayout);
         text = (TextView) this.findViewById(R.id.timer);
         ratingBar = (RatingBar)findViewById(R.id.ratingBar);
@@ -83,6 +84,24 @@ public class MainActivity extends Activity implements TextWatcher{
             }
         });
         //ratingBar.setEnabled(false);
+
+        Intent intent = getIntent();
+        String received = intent.getStringExtra("LEVEL");
+        if (received != null ){
+            if(received.equalsIgnoreCase("LEVEL2")) {
+                levelText.setText("Level 2");
+                startTime = 25 * 1000;
+            } else if(received.equalsIgnoreCase("LEVEL3")) {
+                levelText.setText("Level 3");
+                startTime = 20 * 1000;
+            } else if(received.equalsIgnoreCase("LEVEL4")) {
+                levelText.setText("Level 4");
+                startTime = 15 * 1000;
+            } else if(received.equalsIgnoreCase("LEVEL5")) {
+                levelText.setText("Level 5");
+                startTime = 10 * 1000;
+            }
+        }
 
         countDownTimer = new MyCountDownTimer(startTime, interval);
         text.setText(text.getText() + String.valueOf(startTime / 1000));
@@ -130,8 +149,9 @@ public class MainActivity extends Activity implements TextWatcher{
                         ratingBar.setRating(ratingBar.getRating() + 1.0f);
                         //ratingBar.setRating(Float.parseFloat(Float.valueOf(ratingBar.getNumStars())+1f));
                         if (ratingBar.getRating() == 5){
-                            Toast.makeText(MainActivity.this, "Level 1 Completed !!!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(MainActivity.this, levelText.getText().toString()+ " Completed !!!", Toast.LENGTH_LONG).show();
                             Intent intent = new Intent(MainActivity.this, GridLevel.class);
+                            intent.putExtra("COMPLETED","LevelCompleted");
                             startActivity(intent);
                             finish();
                         }
