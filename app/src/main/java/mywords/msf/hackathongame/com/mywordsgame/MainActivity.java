@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -19,6 +20,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -28,6 +30,7 @@ import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -73,6 +76,12 @@ public class MainActivity extends Activity implements TextWatcher{
         text = (TextView) this.findViewById(R.id.timer);
         ratingBar = (RatingBar)findViewById(R.id.ratingBar);
         ratingBar.setClickable(false);
+        ratingBar.setFocusable(false);
+        ratingBar.setOnTouchListener(new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                return true;
+            }
+        });
         //ratingBar.setEnabled(false);
 
         countDownTimer = new MyCountDownTimer(startTime, interval);
@@ -108,7 +117,7 @@ public class MainActivity extends Activity implements TextWatcher{
                 System.out.println("random  value ====="+ randomInt.toString());
 
                 String str = inputStr.replace("_", answerStr.trim());
-                if (str.equalsIgnoreCase(randomInt)){
+                if (str.equalsIgnoreCase(randomInt) && str.length() > 0){
                     System.out.println("Success =====" + str);
                     textResult.setVisibility(View.VISIBLE);
                     imageResult.setVisibility(View.VISIBLE);
@@ -116,10 +125,18 @@ public class MainActivity extends Activity implements TextWatcher{
                     textResult.setText("Perfect !!!");
                     timerHasStarted = false;
                     loadQuestion();
-                    if (ratingBar.getNumStars() >= 1){
-                        ratingBar.setRating(ratingBar.getNumStars()+1);
+                    System.out.println("random  value =====" + ratingBar.getRating());
+                    if (ratingBar.getRating() >= 1){
+                        ratingBar.setRating(ratingBar.getRating() + 1.0f);
+                        //ratingBar.setRating(Float.parseFloat(Float.valueOf(ratingBar.getNumStars())+1f));
+                        if (ratingBar.getRating() == 5){
+                            Toast.makeText(MainActivity.this, "Level 1 Completed !!!", Toast.LENGTH_LONG).show();
+                            Intent intent = new Intent(MainActivity.this, GridLevel.class);
+                            startActivity(intent);
+                            finish();
+                        }
                     } else {
-                        ratingBar.setRating(1);
+                        ratingBar.setRating(1.0f);
                     }
                     //ratingBar.setNumStars(1);
                 } else {
@@ -172,18 +189,23 @@ public class MainActivity extends Activity implements TextWatcher{
                 LinearLayout linearLayout = new LinearLayout(MainActivity.this);
                 //linearLayout.setGravity(Gravity.CENTER);
                 EditText myTextViews = new EditText(MainActivity.this);
+                int maxLengthofEditText = 1;
+                myTextViews.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maxLengthofEditText)});
                        /* int maxLength = 1;
                         InputFilter[] FilterArray = new InputFilter[1];
                         FilterArray[0] = new InputFilter.LengthFilter(maxLength);
                         myTextViews.setFilters(FilterArray);*/
                 //myTextViews.addTextChangedListener(MainActivity.this);
                 myTextViews.setPadding(30, 10, 30, 10);
+                myTextViews.setSingleLine();
+                myTextViews.setTextColor(Color.BLACK);
                 myTextViews.setBackgroundDrawable(getResources().getDrawable(R.drawable.border_file));
                 //Log.i(TAG, "Data========== " + inputStr.charAt(i));
                 if (String.valueOf(inputStr.charAt(i)).equalsIgnoreCase("_")) {
-                    myTextViews.setText(" ");
+                    //myTextViews.setText(" ");
                     myTextViews.setEnabled(true);
                     myTextViews.addTextChangedListener(MainActivity.this);
+
                 } else {
                     myTextViews.setText(String.valueOf(inputStr.charAt(i)));
                     myTextViews.setEnabled(false);
@@ -317,7 +339,7 @@ public class MainActivity extends Activity implements TextWatcher{
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-            if (s.toString().trim().length() > 0) {
+            if (s.toString().trim().length() > 0 && !text.getText().toString().equalsIgnoreCase("Time's up!")) {
                 answerStr = s.toString();
                 validate.setEnabled(true);
             } else {
