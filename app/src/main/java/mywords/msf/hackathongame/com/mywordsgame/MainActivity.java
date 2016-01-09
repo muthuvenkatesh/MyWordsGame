@@ -1,5 +1,6 @@
 package mywords.msf.hackathongame.com.mywordsgame;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.ContextWrapper;
@@ -10,7 +11,6 @@ import android.graphics.Color;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -25,6 +25,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RatingBar;
 import android.widget.TableRow;
 import android.widget.TextView;
 
@@ -56,6 +57,7 @@ public class MainActivity extends Activity implements TextWatcher{
     private final long startTime = 30 * 1000;
     private final long interval = 1 * 1000;
     private boolean timerHasStarted = false;
+    private RatingBar ratingBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +71,10 @@ public class MainActivity extends Activity implements TextWatcher{
         textResult = (TextView)findViewById(R.id.textResult);
         progressBarLayout = (LinearLayout)findViewById(R.id.progressBarLayout);
         text = (TextView) this.findViewById(R.id.timer);
+        ratingBar = (RatingBar)findViewById(R.id.ratingBar);
+        ratingBar.setClickable(false);
+        //ratingBar.setEnabled(false);
+
         countDownTimer = new MyCountDownTimer(startTime, interval);
         text.setText(text.getText() + String.valueOf(startTime / 1000));
 
@@ -79,20 +85,20 @@ public class MainActivity extends Activity implements TextWatcher{
             copyTextFileToDB();
         }
 
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!btn.getText().toString().equalsIgnoreCase("End Game")) {
-                    //progressBarLayout.setVisibility(View.VISIBLE);
+//        btn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (!btn.getText().toString().equalsIgnoreCase("End Game")) {
+//                    //progressBarLayout.setVisibility(View.VISIBLE);
                     loadLevel1Data();
                     Log.i(TAG, "If loop......" + String.valueOf(questionList.size()));
-                } else {
-                    Log.i(TAG, String.valueOf(questionList.size()));
-                    finish();
-                }
-
-            }
-        });
+//                } else {
+//                    Log.i(TAG, String.valueOf(questionList.size()));
+//                    finish();
+//                }
+//
+//            }
+//        });
 
         validate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,107 +114,87 @@ public class MainActivity extends Activity implements TextWatcher{
                     imageResult.setVisibility(View.VISIBLE);
                     imageResult.setImageResource(R.drawable.yes);
                     textResult.setText("Perfect !!!");
+                    timerHasStarted = false;
+                    loadQuestion();
+                    if (ratingBar.getNumStars() >= 1){
+                        ratingBar.setRating(ratingBar.getNumStars()+1);
+                    } else {
+                        ratingBar.setRating(1);
+                    }
+                    //ratingBar.setNumStars(1);
                 } else {
                     System.out.println("Failed =====" + str);
                     textResult.setVisibility(View.VISIBLE);
                     imageResult.setVisibility(View.VISIBLE);
                     imageResult.setImageResource(R.drawable.no);
                     textResult.setText("Try Again !!!");
+                    if (text.toString().equalsIgnoreCase("Time's Up")) {
+                        validate.setEnabled(false);
+                        timerHasStarted = false;
+                        loadlevel1.setText("Next >");
+                        loadlevel1.setEnabled(true);
+                    }
                 }
             }
         });
-/*
-        loadlevel1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (questionList != null & questionList.size() > 0) {
-                    Random rand = new Random();
-                    level1Layout.removeAllViews();
-                    final int N = 10;
-                    final TextView[] myTextViews = new TextView[N];
-                    for (int i = 1; i <= 5; i++) {
-                        String randomInt = questionList.get(rand.nextInt(questionList.size()));
-                        Log.i(TAG, "Data========== " + i + "=====" + randomInt);
-                        final TextView rowTextView = new TextView(MainActivity.this);
-                        rowTextView.setText(i + ")" + randomInt);
-                        rowTextView.setTextColor(Color.BLACK);
-                        rowTextView.setTextSize(20);
-                        level1Layout.addView(rowTextView);
-                        myTextViews[i] = rowTextView;
-                    }
-                } else {
-                    loadLevel1Data();
-                }
-            }
-        });*/
+
         //final EditText myTextViews = new EditText(MainActivity.this);
         loadlevel1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (questionList != null & questionList.size() > 0) {
-                    Random rand = new Random();
-                    level1Layout.removeAllViews();
+                loadQuestion();
+                //if (!timerHasStarted) {
+                    countDownTimer.start();
+                    timerHasStarted = true;
+                //}
+            }
+        });
+    }
 
-                    textResult.setVisibility(View.GONE);
-                    imageResult.setVisibility(View.GONE);
-                    if (!timerHasStarted) {
-                        countDownTimer.start();
-                        timerHasStarted = true;
-                        //startB.setText("STOP");
-                    } /*else {
-                        countDownTimer.cancel();
-                        timerHasStarted = false;
-                        //startB.setText("RESTART");
-                    }*/
+    private void loadQuestion() {
+        loadlevel1.setText("Next >");
+        loadlevel1.setEnabled(false);
+        if (questionList != null & questionList.size() > 0) {
+            Random rand = new Random();
+            level1Layout.removeAllViews();
 
-                    randomInt = questionList.get(rand.nextInt(questionList.size()));
-                    inputStr = changeString(randomInt);
-                    for (int i = 0; i < inputStr.length(); i++) {
-                        LinearLayout linearLayout = new LinearLayout(MainActivity.this);
-                        linearLayout.setGravity(Gravity.CENTER);
-                        EditText myTextViews = new EditText(MainActivity.this);
+            textResult.setVisibility(View.GONE);
+            imageResult.setVisibility(View.GONE);
+            btn.setVisibility(View.GONE);
+            if (!timerHasStarted) {
+                countDownTimer.start();
+                timerHasStarted = true;
+            }
+
+            randomInt = questionList.get(rand.nextInt(questionList.size()));
+            inputStr = changeString(randomInt);
+            for (int i = 0; i < inputStr.length(); i++) {
+                LinearLayout linearLayout = new LinearLayout(MainActivity.this);
+                //linearLayout.setGravity(Gravity.CENTER);
+                EditText myTextViews = new EditText(MainActivity.this);
                        /* int maxLength = 1;
                         InputFilter[] FilterArray = new InputFilter[1];
                         FilterArray[0] = new InputFilter.LengthFilter(maxLength);
                         myTextViews.setFilters(FilterArray);*/
-                        //myTextViews.addTextChangedListener(MainActivity.this);
-                        myTextViews.setPadding(30, 10, 30, 10);
-                        myTextViews.setBackgroundDrawable(getResources().getDrawable(R.drawable.border_file));
-                        Log.i(TAG, "Data========== " + inputStr.charAt(i));
-                        if (String.valueOf(inputStr.charAt(i)).equalsIgnoreCase("_")) {
-                            myTextViews.setText(" ");
-                            myTextViews.setEnabled(true);
-                            myTextViews.addTextChangedListener(MainActivity.this);
-                           /* myTextViews.addTextChangedListener(new TextWatcher() {
-                                @Override
-                                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-                                }
-
-                                @Override
-                                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                                    answerStr = myTextViews.getText().toString();
-                                }
-
-                                @Override
-                                public void afterTextChanged(Editable s) {
-
-                                }
-                            });*/
-
-                        } else {
-                            myTextViews.setText(String.valueOf(inputStr.charAt(i)));
-                            myTextViews.setEnabled(false);
-                        }
-
-                        linearLayout.addView(myTextViews);
-                        level1Layout.addView(linearLayout);
-                    }
+                //myTextViews.addTextChangedListener(MainActivity.this);
+                myTextViews.setPadding(30, 10, 30, 10);
+                myTextViews.setBackgroundDrawable(getResources().getDrawable(R.drawable.border_file));
+                //Log.i(TAG, "Data========== " + inputStr.charAt(i));
+                if (String.valueOf(inputStr.charAt(i)).equalsIgnoreCase("_")) {
+                    myTextViews.setText(" ");
+                    myTextViews.setEnabled(true);
+                    myTextViews.addTextChangedListener(MainActivity.this);
                 } else {
-                    loadLevel1Data();
+                    myTextViews.setText(String.valueOf(inputStr.charAt(i)));
+                    myTextViews.setEnabled(false);
                 }
+
+                linearLayout.addView(myTextViews);
+                level1Layout.addView(linearLayout);
             }
-        });
+        } else {
+            loadLevel1Data();
+        }
     }
 
     String changeString(String s) {
@@ -225,19 +211,6 @@ public class MainActivity extends Activity implements TextWatcher{
         return new String(characters);
 
     }
-/*
-    private Button submitButton() {
-        Button button = new Button(this);
-        button.setHeight(WRAP_CONTENT);
-        button.setText("Submit");
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-        return button;
-    }*/
 
     private static boolean doesDatabaseExist(ContextWrapper context, String dbName) {
         File dbFile = context.getDatabasePath(dbName);
@@ -245,19 +218,17 @@ public class MainActivity extends Activity implements TextWatcher{
     }
 
     private void loadLevel1Data(){
-        progressBarLayout.setVisibility(View.VISIBLE);
+        //progressBarLayout.setVisibility(View.VISIBLE);
         new Thread(new Runnable() {
             @Override
             public void run() {
                 if (questionList.size() == 0){
-                    //loadlevel1.setVisibility(View.GONE);
-                    //loadingtxt.setVisibility(View.VISIBLE);
                     Cursor cd = dbHelper.getAllComments();
                     for (cd.moveToFirst(); !(cd.isAfterLast()); cd.moveToNext()) {
                         String userCount = cd.getString(cd.getColumnIndex("name"));
                         questionList.add(userCount);
                     }
-                    handler.sendMessage(handler.obtainMessage());
+                   // handler.sendMessage(handler.obtainMessage());
                     cd.close();
 
                 }
@@ -265,7 +236,7 @@ public class MainActivity extends Activity implements TextWatcher{
         }).start();
     }
 
-    Handler handler = new Handler(){
+   /* Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             //super.handleMessage(msg);
@@ -274,7 +245,7 @@ public class MainActivity extends Activity implements TextWatcher{
             progressBarLayout.setVisibility(View.GONE);
             loadlevel1.setVisibility(View.VISIBLE);
         }
-    };
+    };*/
 
     /*private boolean checkDataBase(){
 
@@ -323,7 +294,6 @@ public class MainActivity extends Activity implements TextWatcher{
                 value.add(line.toString());
 
             }
-
             //Log.i("Count=====", String.valueOf(values.size()));
             try {
                 dbHelper.insertAll(value);
@@ -372,6 +342,7 @@ public class MainActivity extends Activity implements TextWatcher{
         public void onFinish() {
             text.setText("Time's up!");
             validate.setEnabled(false);
+            loadlevel1.setEnabled(true);
             imageResult.setVisibility(View.GONE);
             textResult.setVisibility(View.GONE);
         }

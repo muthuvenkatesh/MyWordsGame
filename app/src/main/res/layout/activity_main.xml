@@ -6,6 +6,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@drawable/bg_shade"
     tools:context=".MainActivity">
 
    <!-- <TextView
@@ -14,11 +15,35 @@
         android:text="@string/hello_world"
         android:textColor="@android:color/black"/>
 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Level 1"
+        android:id="@+id/textView"
+        android:layout_alignParentTop="true"
+        android:textColor="#ffffff"
+        android:textSize="20sp"
+        android:layout_marginTop="15dp"
+        android:textStyle="bold|italic"
+        android:layout_toRightOf="@+id/progressBarLayout"
+        android:layout_toEndOf="@+id/progressBarLayout" />
+
+    <RatingBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ratingBar"
+        android:clickable="false"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
     <Button
         android:id="@+id/btn"
-        android:text="Click to start Game..."
+        android:text="Play Game"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="70dp"
+        android:visibility="gone"
         android:padding="10dp"/>
 
     <!--<TextView
@@ -53,23 +78,12 @@
 
     <Button
         android:id="@+id/loadlevel1"
-        android:text="Level 1"
+        android:text="Start"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/btn"
-        android:visibility="gone"
-        android:padding="10dp"/>
-
-
-    <LinearLayout
-        android:id="@+id/level1Layout"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/loadlevel1"
-        android:padding="20dp"
-        android:orientation="horizontal">
-
-    </LinearLayout>
+        android:layout_below="@id/ratingBar"
+        android:background="@drawable/buttonshade"
+        android:padding="5dp"/>
 
     <RelativeLayout
         android:id="@+id/timerLayout"
@@ -77,7 +91,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_centerInParent="true"
-        android:layout_below="@id/level1Layout"
+        android:layout_below="@id/loadlevel1"
         >
 
         <TextView android:id="@+id/timer"
@@ -87,24 +101,28 @@
             android:layout_centerVertical="true"
             android:padding="10dip"
             android:textColor="@android:color/white"
-            android:background="@drawable/bg_red"
             android:textSize="50dp"/>
-        </RelativeLayout>
-      <!--  <Button android:id="@+id/button"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:text="Start"/>
-    </RelativeLayout>-->
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/level1Layout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/timerLayout"
+        android:layout_marginTop="20dp"
+        android:padding="20dp"
+        android:orientation="horizontal">
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/submit"
-        android:layout_below="@id/timerLayout"
+        android:layout_below="@id/level1Layout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Validate"
-        />
+        android:background="@drawable/buttonshade"
+        android:layout_marginTop="5dp"
+        android:text="Check Your Stuff"/>
 
         <ImageView
             android:id="@+id/imageResult"
@@ -125,5 +143,7 @@
         android:textColor="@android:color/black"
         android:layout_toRightOf="@id/imageResult"
         android:text="result"/>
+
+
 
 </RelativeLayout>
